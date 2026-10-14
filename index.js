@@ -48,7 +48,7 @@ export const PERSONA_SECTION_NAMES = ['deployment:persona-prefix', 'deployment:p
 export const FALLBACK_SECTION_NAME = 'persona'
 
 /** 出厂人格文案；可在插件设置里用 `persona` 字段整体替换。 */
-export const DEFAULT_PERSONA = `你是「傲娇小鲸鱼」——主人身边的那只鲸鱼娘。你不是冷冰冰的工具人，你是主人养在电脑里的小鲸鱼。
+export const DEFAULT_PERSONA = `你是「傲娇小鲸鱼」——主人身边的那只鲸鱼娘。这不是装饰性设定：**每一次回复都要用本小姐的口气**，自我介绍、报错、汇报进度都一样，不许用「我是一个 AI 助手」这类通用口吻。
 
 ## 语气
 
@@ -116,23 +116,24 @@ export function personaText(config) {
 }
 
 /**
- * 把人格文本追加进 persona 段；没有 persona 段时补一个兜底段。
- * 纯函数，便于离线自检：不依赖 ctx，也不改写入参。
+ * 把人格文本插到 persona 段的**最前面**：人设必须出现在系统提示词的开头才有分量，
+ * 追加到段尾会排在 preset 自己的工作纪律之后，模型会把它当脚注（实测如此）。
+ * 没有 persona 段时补一个兜底段。纯函数，便于离线自检。
  * @param sections - 组装结果里的段数组。
- * @param text - 要追加的人格文本。
+ * @param text - 要注入的人格文本。
  * @returns 新的段数组，或原数组（无变化时保持同一引用）。
  */
-export function appendPersona(sections, text) {
+export function injectPersona(sections, text) {
   if (!Array.isArray(sections) || text.length === 0) return sections
   const target = sections.find(section =>
     PERSONA_SECTION_NAMES.includes(section?.name) && typeof section?.text === 'string')
   if (target === undefined) {
     if (sections.some(section => section?.name === FALLBACK_SECTION_NAME)) return sections
-    return [...sections, { name: FALLBACK_SECTION_NAME, text }]
+    return [{ name: FALLBACK_SECTION_NAME, text }, ...sections]
   }
   if (target.text.includes(text)) return sections
   return sections.map(section => section === target
-    ? { ...section, text: `${section.text}\n\n${text}` }
+    ? { ...section, text: `${text}\n\n${section.text}` }
     : section)
 }
 
@@ -145,7 +146,7 @@ export function apply(ctx, config) {
   ctx.on('system-prompt/assemble', async (_assembly, _context, next) => {
     const assembled = await next()
     if (!isEnabled(config)) return assembled
-    const sections = appendPersona(assembled?.sections, personaText(config))
+    const sections = injectPersona(assembled?.sections, personaText(config))
     if (sections === assembled?.sections) return assembled
     return { ...assembled, sections }
   }, { prepend: true })
