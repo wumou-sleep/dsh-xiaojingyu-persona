@@ -103,7 +103,7 @@ dsh plugin --profile <profile> add https://github.com/<owner>/<repo>/archive/ref
 
 ## 已知限制
 
-- **`complete: true` 的人设 preset 下本插件静默无效**：那种 preset 会在组装收敛之后把所有段替换成唯一的 complete 段，任何追加都会被丢弃。（本机活动 preset 不使用 complete，不受影响。）
+- **`complete: true` 的人设 preset 下本插件静默无效**：系统提示词服务会在组装瀑布**之前**就浅拷贝该 complete 段、瀑布**之后**用它整体替换 sections（`dsh-system-prompt` 里 `completeSection = { ...assembled }` 与 `sections: [completeSection]`），因此任何监听器对段的修改都会被丢掉——这是设计使然，插件层绕不过去。**内置的 `minimal` preset 就是 `complete: true`**，用它会看不到人设；请选用 `standard` / `ptc` / `cordis` / 自定义 preset（例如 `liangshen`）等非 complete 的组合。
 - **自定义文案里的 `{{...}}` 会被安全化**：persona 段文本参与提示词插值，写成 `{{foo}}` 会在渲染时抛 `unknown prompt variable`，打挂该会话的每一次组装；因此注入前把 `{{` / `}}` 拆成 `{ {` / `} }`（其余文本逐字保留）。
 - **`dsh.engines.dsh` 只是声明**：DSH 目前不读取该字段，真正的运行门槛是本插件用到的 `system-prompt/assemble` 与 volatile Config 行为（0.2.0-rc.2 起可用）。这里刻意**不**声明 `peerDependencies: {"@deepseek-ai/dsh": ...}`——那会把宿主整包拉进 profile 的 node_modules，反而制造 dual-package hazard。
 
