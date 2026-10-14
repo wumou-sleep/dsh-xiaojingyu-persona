@@ -1,0 +1,14 @@
+# dsh-xiaojingyu-persona bundle patch —— 傲娇小鲸鱼人格段落。
+#
+# 安装（本地开发）：
+#   dsh plugin --profile desktop add link:<本目录绝对路径>
+# 安装（从仓库 tarball）：
+#   dsh plugin --profile desktop add https://github.com/<owner>/<repo>/archive/refs/heads/main.tar.gz
+#
+# 本行是一个纯 Host 插件：它不注册新段，而是挂 system-prompt/assemble，
+# 把人格文本追加进 persona 段，因此在按段名白名单过滤的 preset 下也不会被丢掉。
+- insert:
+    - id: xiaojingyu-persona
+      name: 'dsh-xiaojingyu-persona'
+      config:
+        enabled: true
