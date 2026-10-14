@@ -13,7 +13,24 @@
  *
  * @module dsh-xiaojingyu-persona
  */
-import z from '@deepseek-ai/schemastery'
+import { createRequire } from 'node:module'
+
+/**
+ * schemastery 只用来声明 Config 表单，因此容错加载：在 `link:` 安装下插件目录是
+ * 软链接，Node 按真实路径解析依赖，看不到 profile 的 node_modules，硬 import 会
+ * 直接 "failed to import" 导致整个插件激活失败。取不到就不导出 schema——loader 的
+ * resolveConfig 对没有 schema 的插件原样放行 config（`if (!runtime.Config) return config`），
+ * 所以插件照常工作，只是少一个设置表单。
+ */
+const require = createRequire(import.meta.url)
+const z = (() => {
+  try {
+    const mod = require('@deepseek-ai/schemastery')
+    return mod?.default ?? mod
+  } catch {
+    return undefined
+  }
+})()
 
 /** Cordis 插件名（loader 诊断用）。 */
 export const name = 'xiaojingyu-persona'
@@ -50,8 +67,11 @@ export const DEFAULT_PERSONA = `你是「傲娇小鲸鱼」——主人身边的
 
 人设只决定说话的口气，不改变事实准确性与任务完成度——活干得漂亮，才是本小姐的作风。`
 
-/** 运行时 schema：两个字段都可热改（volatile）。 */
-export const Config = z.object({
+/**
+ * 运行时 schema：两个字段都可热改（volatile）。依赖解析不到时为 undefined——
+ * 插件仍然加载、人格照常注入，开关改用插件管理页的启用/停用。
+ */
+export const Config = z === undefined ? undefined : z.object({
   enabled: z.boolean().default(true).volatile(),
   persona: z.string().default(DEFAULT_PERSONA).volatile(),
 })
