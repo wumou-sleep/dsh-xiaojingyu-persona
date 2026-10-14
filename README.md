@@ -85,6 +85,22 @@ DSH 官方插件开发指引（`cordis-plugin-development/references/practices.m
 - 与 `dsh-persona`（preset 内人设行）、`dsh-cosplay` 可共存：本插件不注册新段、不改段名，只把文本追加进 persona 段。
 - 若同时装了别的也挂 `system-prompt/assemble` 的插件（例如 `dsh-liangshen` 的 `minimal-prompt`），谁在外层决定「工作区行 / 调度规则」与人格文本的先后次序；两种顺序都实测通过，不丢内容。
 
+## `link:` 本地安装的一个坑
+
+用 `dsh plugin ... add link:<目录>` 安装时，插件目录是**软链接**，Node 按真实路径解析依赖，因此它**看不到** profile 的 `node_modules`。本插件对 `@deepseek-ai/schemastery` 做了容错：解析不到时不导出 Config schema（loader 对无 schema 的插件原样放行 config），**插件照常工作，人格照常注入**，只是少了设置表单里的 `enabled` / `persona` 两个字段。
+
+想要设置表单，二选一：
+
+```powershell
+# A. 在插件目录里装上它声明的依赖（推荐本地开发时用）
+npm install --prefix <本目录绝对路径>
+```
+
+```powershell
+# B. 或者改成从仓库 tarball 安装，pnpm 会自己把依赖装进 profile
+dsh plugin --profile <profile> add https://github.com/<owner>/<repo>/archive/refs/tags/v1.0.1.tar.gz
+```
+
 ## 已知限制
 
 - **`complete: true` 的人设 preset 下本插件静默无效**：那种 preset 会在组装收敛之后把所有段替换成唯一的 complete 段，任何追加都会被丢弃。（本机活动 preset 不使用 complete，不受影响。）
