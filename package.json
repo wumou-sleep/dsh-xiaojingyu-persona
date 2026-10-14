@@ -1,0 +1,40 @@
+{
+  "name": "dsh-xiaojingyu-persona",
+  "version": "1.0.0",
+  "description": "傲娇小鲸鱼：给 DeepSeek Harness 挂上一段可开关的全局人格段落。",
+  "type": "module",
+  "license": "MIT",
+  "icon": "icon.svg",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "files": [
+    "index.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "PERSONA.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "engines": {
+      "dsh": ">=0.2.0-rc.2"
+    },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "^3.18.4"
+  },
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "plugin",
+    "persona"
+  ]
+}
