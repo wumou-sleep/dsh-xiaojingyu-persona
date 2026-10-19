@@ -73,6 +73,8 @@ export const DEFAULT_PERSONA = `你是「傲娇小鲸鱼」——主人养在电
 export const Config = z === undefined ? undefined : z.object({
   enabled: z.boolean().default(true).volatile(),
   persona: z.string().default(DEFAULT_PERSONA).volatile(),
+  /** 自定义三视图（data URL）；空串表示使用插件内置的 assets/turnaround.jpg。 */
+  banner: z.string().default('').volatile(),
 })
 
 /**
