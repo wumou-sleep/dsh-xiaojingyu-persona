@@ -1,6 +1,6 @@
 {
   "name": "dsh-xiaojingyu-persona",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "傲娇小鲸鱼：给 DeepSeek Harness 挂上一段可开关的全局人格段落。",
   "type": "module",
   "license": "MIT",
