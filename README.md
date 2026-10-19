@@ -128,7 +128,7 @@ npm install --prefix <本目录绝对路径>
 
 ```powershell
 # B. 或者改成从仓库 tarball 安装，pnpm 会自己把依赖装进 profile
-dsh plugin --profile <profile> add https://github.com/<owner>/<repo>/archive/refs/tags/v1.0.1.tar.gz
+dsh plugin --profile <profile> add https://github.com/<owner>/<repo>/archive/refs/tags/v1.0.13.tar.gz
 ```
 
 ## 已知限制
