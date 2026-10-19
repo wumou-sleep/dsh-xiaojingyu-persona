@@ -34,6 +34,36 @@
 
 装完**重启 DSH**（新 bundle 需要一次重启才会加载新的 JavaScript 模块）。
 
+## 设置页卡片（Web UI）
+
+装好后在 **设置** 页会出现一个「傲娇小鲸鱼 · 人格预设」分区（客户端注册在 `settings.section` 槽位）：
+
+- 展示 **三视图**（`assets/turnaround.jpg`，以 base64 内嵌进 `client.js`，不额外请求网络）；
+- 展示 **出厂人设**，放在**可编辑文本框**里（默认值取自 `index.js` 的 `DEFAULT_PERSONA`，单一来源；就绪后以主机里的当前值为准）；
+- **保存到配置**：直接写主机配置行的 `persona` 字段（客户端服务 `configForms` → `form.set('persona', text)`），保存后对**新建会话**生效；
+- **启用 / 停用**：同样是直写 `enabled`；
+- 辅助：恢复出厂文案、复制到剪贴板、字数、状态徽标（未就绪 / 可保存）。
+
+### 三视图也可自定义（banner 字段）
+
+- 卡片里的「选择本地图片…」会读图 → 浏览器侧缩到宽 720px → 转 JPEG（q 0.86，必要时逐级降到 0.4），直到 data URL ≤ 190,000 字符；
+- 「保存三视图」把它写进配置行的 `banner` 字段（空串 = 使用插件内置的 `assets/turnaround.jpg`）；
+- 「恢复内置图」把 `banner` 清空；
+- 代价：自定义图以 data URL 存在 `cordis.patch.yml` 的配置行里，行会明显变胖（上限 ~190 KB 文本）。想彻底干净就得让 host 端存文件并提供路由，属于后续增强。
+
+### 卡内保存是怎么做到的
+
+客户端注入官方的 `configForms` 服务（与 `@linxin666/dsh-pet` 同一套机制）：
+
+```js
+inject: ['slots', 'configForms']
+const form = ctx.configForms.get('xiaojingyu-persona')   // 配置行 id
+await form.set('persona', text)                           // true / false
+form.getSnapshot()                                        // { status, value, revision }
+```
+
+该服务**可能在 apply() 之后才发布**（官方 `dsh-pet` 的注释明确提到这一点），因此卡片内用 40×250ms 的轮询延迟绑定，并对 `status === 'ready'` 才允许保存。`ctx.configForms.describe()` 会列出主机实际服务的命名空间，卡片据此自动匹配本插件的行 id。
+
 ## 开关与配置
 
 | 方式 | 位置 | 说明 |
